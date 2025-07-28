@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kynde-postgres
+    environment:
+      POSTGRES_DB: kynde_db
+      POSTGRES_USER: kynde_user
+      POSTGRES_PASSWORD: kynde_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    networks:
+      - kynde-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kynde_user -d kynde_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for caching and rate limiting
+  redis:
+    image: redis:7-alpine
+    container_name: kynde-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - kynde-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kynde-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/kynde_db
+      SPRING_DATASOURCE_USERNAME: kynde_user
+      SPRING_DATASOURCE_PASSWORD: kynde_password
+      
+      # Redis configuration
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      
+      # JWT configuration
+      APP_JWT_SECRET: mySecretKey12345678901234567890123456789012345678901234567890123456789012345678901234567890
+      APP_JWT_EXPIRATION: 86400000
+      
+      # Firebase configuration (optional)
+      APP_FIREBASE_SERVICE_ACCOUNT_KEY_PATH: firebase-service-account.json
+      
+      # Logging
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_KZ_SLAMKULGROUP_KYNDEBACKENDAPP: DEBUG
+      
+      # Profile
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - kynde-network
+    volumes:
+      - ./logs:/app/logs
+      # Mount Firebase service account key if available
+      - ./firebase-service-account.json:/app/firebase-service-account.json:ro
+    restart: unless-stopped
+
+  # Nginx reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    container_name: kynde-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app
+    networks:
+      - kynde-network
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  kynde-network:
+    driver: bridge

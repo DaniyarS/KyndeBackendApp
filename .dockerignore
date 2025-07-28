@@ -1,0 +1,45 @@
+# .dockerignore file to reduce Docker build context size
+
+# Maven
+target/
+!target/*.jar
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+
+# Test files
+src/test/
+
+# Firebase credentials (security)
+firebase-service-account.json
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
