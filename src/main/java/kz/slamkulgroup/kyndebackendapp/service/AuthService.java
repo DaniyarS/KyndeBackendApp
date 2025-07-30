@@ -22,7 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
-    
+
+    //check
     @Autowired
     private UserService userService;
     
