@@ -1,8 +1,6 @@
 package kz.slamkulgroup.kyndebackendapp.embedded;
 
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import kz.slamkulgroup.kyndebackendapp.enums.ScheduleType;
 
 import java.time.DayOfWeek;
@@ -16,6 +14,10 @@ public class ScheduleConfig {
     
     private Integer interval;
     
+    @ElementCollection(targetClass = DayOfWeek.class)
+    @CollectionTable(name = "habit_custom_days", joinColumns = @JoinColumn(name = "habit_id"))
+    @Column(name = "day_of_week")
+    @Enumerated(EnumType.STRING)
     private List<DayOfWeek> customDays;
     
     public ScheduleConfig() {}

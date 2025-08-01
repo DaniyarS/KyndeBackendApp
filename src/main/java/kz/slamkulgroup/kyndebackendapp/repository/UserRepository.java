@@ -25,6 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.streak WHERE u.id = :id")
     Optional<User> findByIdWithStreak(@Param("id") Long id);
     
-    @EntityGraph(attributePaths = {"habits", "streak"})
-    Optional<User> findByIdWithHabitsAndStreak(Long id);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.habits LEFT JOIN FETCH u.streak WHERE u.id = :id")
+    Optional<User> findByIdWithHabitsAndStreak(@Param("id") Long id);
 }

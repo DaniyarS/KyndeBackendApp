@@ -1,0 +1,509 @@
+{
+  "info": {
+    "name": "Kynde Backend API",
+    "description": "Complete API collection for Kynde habit tracking application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "register"]
+            },
+            "description": "Register a new user with email, phone, and password"
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            },
+            "description": "Authenticate user and get JWT token"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
+                  "    console.log('JWT token saved:', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "me"]
+            },
+            "description": "Get the authenticated user's profile information"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/users/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "stats"]
+            },
+            "description": "Get user's habit completion statistics and streak information"
+          },
+          "response": []
+        },
+        {
+          "name": "Update FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"firebase_cloud_messaging_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/users/fcm-token",
+              "host": ["{{base_url}}"],
+              "path": ["api", "users", "fcm-token"]
+            },
+            "description": "Update the user's Firebase Cloud Messaging token for push notifications"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Habit Management",
+      "item": [
+        {
+          "name": "Get User Habits",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/habits?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Page size"
+                }
+              ]
+            },
+            "description": "Get paginated list of user's habits"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Habit by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/habits/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits", "1"]
+            },
+            "description": "Get a specific habit by its ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Daily Habit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Morning Exercise\",\n  \"description\": \"30 minutes of morning workout\",\n  \"scheduleType\": \"DAILY\",\n  \"interval\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/habits",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits"]
+            },
+            "description": "Create a new daily habit"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Weekly Habit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grocery Shopping\",\n  \"description\": \"Weekly grocery shopping\",\n  \"scheduleType\": \"WEEKLY\",\n  \"interval\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/habits",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits"]
+            },
+            "description": "Create a new weekly habit"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Custom Habit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Yoga Classes\",\n  \"description\": \"Attend yoga classes on specific days\",\n  \"scheduleType\": \"CUSTOM\",\n  \"customDays\": [\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/habits",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits"]
+            },
+            "description": "Create a new custom habit with specific days"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Habit",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Evening Exercise\",\n  \"description\": \"45 minutes of evening workout\",\n  \"scheduleType\": \"DAILY\",\n  \"interval\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/habits/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits", "1"]
+            },
+            "description": "Update an existing habit"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Habit",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/habits/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "habits", "1"]
+            },
+            "description": "Delete a habit and all its associated tasks"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Task Management",
+      "item": [
+        {
+          "name": "Get User Tasks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Page size"
+                }
+              ]
+            },
+            "description": "Get paginated list of user's tasks"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks for Today",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/date/{{$isoTimestamp | isoDateOnly}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "date", "{{$isoTimestamp | isoDateOnly}}"]
+            },
+            "description": "Get all tasks for today's date"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tasks for Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/date/2025-08-01",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "date", "2025-08-01"]
+            },
+            "description": "Get all tasks for a specific date (YYYY-MM-DD format)"
+          },
+          "response": []
+        },
+        {
+          "name": "Complete Task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/1/complete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "1", "complete"]
+            },
+            "description": "Mark a task as completed"
+          },
+          "response": []
+        },
+        {
+          "name": "Uncomplete Task",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/tasks/1/uncomplete",
+              "host": ["{{base_url}}"],
+              "path": ["api", "tasks", "1", "uncomplete"]
+            },
+            "description": "Mark a task as not completed"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health Check",
+      "item": [
+        {
+          "name": "Application Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/actuator/health",
+              "host": ["{{base_url}}"],
+              "path": ["actuator", "health"]
+            },
+            "description": "Check application health status"
+          },
+          "response": []
+        },
+        {
+          "name": "Application Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/actuator/info",
+              "host": ["{{base_url}}"],
+              "path": ["actuator", "info"]
+            },
+            "description": "Get application information"
+          },
+          "response": []
+        },
+        {
+          "name": "Application Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/actuator/metrics",
+              "host": ["{{base_url}}"],
+              "path": ["actuator", "metrics"]
+            },
+            "description": "Get application metrics"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
